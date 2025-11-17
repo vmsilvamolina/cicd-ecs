@@ -20,10 +20,10 @@ jobs:
     - name: Validate confirmation
       run: |
         if [ "${{ github.event.inputs.confirm_destroy }}" != "destroy" ]; then
-          echo "❌ Destruction cancelled. You must type 'destroy' to confirm."
+          echo "Destruction cancelled. You must type 'destroy' to confirm."
           exit 1
         fi
-        echo "✅ Confirmation received. Proceeding with infrastructure destruction..."
+        echo "Confirmation received. Proceeding with infrastructure destruction..."
 
     - name: Checkout code
       uses: actions/checkout@v3
@@ -37,28 +37,7 @@ jobs:
         aws-region: ${{ env.AWS_REGION }}
 
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.5.0
-
-    - name: Empty ECR Repository
-      run: |
-        echo "Emptying ECR repository..."
-        aws ecr describe-images \
-          --repository-name ${{ env.ECR_REPOSITORY }} \
-          --query 'imageIds[*]' \
-          --output json \
-          --region ${{ env.AWS_REGION }} > images.json || echo "[]" > images.json
-        
-        if [ $(cat images.json | jq '. | length') -gt 0 ]; then
-          aws ecr batch-delete-image \
-            --repository-name ${{ env.ECR_REPOSITORY }} \
-            --image-ids "$(cat images.json)" \
-            --region ${{ env.AWS_REGION }} || true
-          echo "ECR repository emptied"
-        else
-          echo "ECR repository is already empty"
-        fi
+      uses: hashicorp/setup-terraform@v3
 
     - name: Terraform Init
       working-directory: ./terraform
@@ -71,4 +50,3 @@ jobs:
     - name: Cleanup Complete
       run: |
         echo "Infrastructure destroyed successfully!"
-        echo "All AWS resources have been removed."
