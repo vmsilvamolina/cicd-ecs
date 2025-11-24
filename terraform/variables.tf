@@ -27,3 +27,9 @@ variable "container_name" {
   type        = string
   default     = "web-app"
 }
+
+variable "dashboard_name" {
+  description = "Name of the CloudWatch dashboard"
+  type        = string
+  default     = "ecs-dashboard"
+}
