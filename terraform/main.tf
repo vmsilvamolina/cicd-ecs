@@ -295,3 +295,45 @@ resource "aws_ecs_service" "main" {
 data "aws_availability_zones" "available" {
   state = "available"
 }
+
+resource "aws_cloudwatch_dashboard" "main" {
+  dashboard_name = var.dashboard_name
+
+  dashboard_body = jsonencode({
+    widgets = [
+      {
+        type = "metric",
+        x    = 0, y = 0, width = 12, height = 6,
+        properties = {
+          title = "CPU Utilization ECS",
+          metrics = [["AWS/ECS", "CPUUtilization", "ClusterName", var.ecs_cluster_name, "ServiceName", "${var.ecs_service_name}"],
+                     [".", "CPUUtilization", "ClusterName", var.ecs_cluster_name, "ServiceName", "${var.ecs_service_name}"]
+          ],
+          stat = "Average", period = 300, view = "timeSeries", region = var.aws_region
+        }
+      },
+      {
+        type = "metric",
+        x    = 12, y = 0, width = 12, height = 6,
+        properties = {
+          title   = "Memory Utilization ECS",
+          metrics = [["AWS/ECS", "MemoryUtilization", "ClusterName", var.ecs_cluster_name, "ServiceName", "${var.ecs_service_name}"],
+                     ["AWS/ECS", "MemoryUtilization", "ClusterName", var.ecs_cluster_name, "ServiceName", "${var.ecs_service_name}"]
+          ],
+          stat    = "Average", period = 300, view = "timeSeries", region = var.aws_region
+        }
+      },
+      {
+        type = "metric",
+        x    = 0, y = 6, width = 12, height = 6,
+        properties = {
+          title   = "Latency ALB",
+          metrics = [["AWS/ApplicationELB", "TargetResponseTime", "LoadBalancer", "ecs-alb"],
+                     ["AWS/ApplicationELB", "TargetResponseTime", "LoadBalancer", "ecs-alb"]
+          ],
+          stat    = "Average", period = 300, view = "timeSeries", region = var.aws_region
+        }
+      }
+    ]
+  })
+}
