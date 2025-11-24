@@ -333,6 +333,16 @@ resource "aws_cloudwatch_dashboard" "main" {
           ],
           stat    = "Average", period = 300, view = "timeSeries", region = var.aws_region
         }
+      },
+      {
+        type = "metric",
+        x    = 12, y = 6, width = 12, height = 6,
+        properties = {
+          title   = "Requests ALB",
+          metrics = [["AWS/ApplicationELB", "RequestCount", "LoadBalancer", "ecs-alb"]
+          ],
+          stat    = "Average", period = 300, view = "timeSeries", region = var.aws_region
+        }
       }
     ]
   })
